@@ -4,6 +4,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Escucha">
 <meta name="theme-color" content="#1e1e1c">
+<link rel="icon" href="favicon.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap">
 <style>
@@ -36,8 +39,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--carbon);color:#f3efe6}
 header .env{display:flex;align-items:center;gap:12px;padding-block:12px;min-height:58px}
-.marca{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
-.marca span{color:var(--oro)}
+.marca{font-family:var(--display);font-size:20px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;white-space:nowrap;color:var(--oro)}
+.marca span{color:#f3efe6}
+/* El PNG del logo trae el mismo carbón de fondo (#1e1e1c) que la cabecera, así que no
+   necesita recorte: se funde con la banda. */
+.logo{height:34px;width:auto;display:block;flex:none}
+.sep{width:1px;height:24px;background:#4a4843;flex:none}
+@media(max-width:430px){.logo{height:32px}.marca{font-size:16px}}
 header .ctx{margin-left:auto;font-size:12px;color:#c3bdb0;text-align:right;min-width:0}
 .btn-vol{background:none;border:1px solid #4a4843;color:#f3efe6;border-radius:6px;padding:6px 11px;font:inherit;font-size:13px;cursor:pointer}
 .btn-vol:hover{border-color:var(--oro)}
@@ -46,16 +54,29 @@ main{padding-block:22px 110px}
 h1{font-family:var(--display);font-size:30px;font-weight:700;letter-spacing:.02em;margin:0 0 6px;text-wrap:balance}
 .bajada{color:var(--tenue);font-size:14px;margin:0 0 22px;max-width:62ch}
 
+/* Portada: el escudo grande sobre el carbón, para que la app se vea de la casa y no
+   como un formulario suelto. */
+.portada{display:flex;gap:20px;align-items:center;background:var(--carbon);color:#f3efe6;
+  border-left:4px solid var(--oro);border-radius:3px;padding:24px 26px;margin-bottom:24px}
+.portada img{width:76px;height:auto;flex:none}
+.portada h1{color:#f3efe6;margin:0 0 5px;font-size:28px}
+.portada p{color:#c3bdb0;font-size:13.5px;margin:0;max-width:52ch;line-height:1.55}
+@media(max-width:560px){.portada{padding:20px}.portada img{width:56px}.portada h1{font-size:23px}}
+
 .menu{display:grid;gap:12px}
 .inst{display:flex;align-items:flex-start;gap:14px;width:100%;text-align:left;background:var(--papel);
   border:1px solid var(--borde);border-left:4px solid var(--oro);border-radius:3px;padding:16px 18px;
-  font:inherit;color:inherit;cursor:pointer}
-.inst:hover{border-color:var(--oro)}
+  font:inherit;color:inherit;cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .15s}
+.inst:hover{border-color:var(--oro);box-shadow:0 4px 16px rgba(30,30,28,.10)}
+@media (prefers-reduced-motion:no-preference){.inst:hover{transform:translateY(-1px)}}
+.inst:active{transform:none}
 .inst .letra{font-family:var(--display);font-size:26px;font-weight:700;color:var(--oro);line-height:1;width:26px;flex:none}
-.inst .nom{font-weight:600;font-size:15px}
-.inst .det{color:var(--tenue);font-size:13px;margin-top:3px}
-.inst .cuenta{margin-left:auto;flex:none;font-size:12px;font-weight:600;color:var(--tenue);
-  font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:4px}
+.inst .nom{display:block;font-weight:600;font-size:15px}
+.inst .det{display:block;color:var(--tenue);font-size:13px;margin-top:3px}
+.inst .cuenta{margin-left:auto;flex:none;font-size:11.5px;font-weight:600;color:var(--tenue);
+  font-variant-numeric:tabular-nums;white-space:nowrap;padding:3px 9px;border-radius:999px;
+  border:1px solid var(--borde);background:var(--bg)}
+.inst .cuenta.hay{color:var(--carbon);border-color:var(--oro);background:rgba(176,141,79,.14)}
 
 .tarjeta{background:var(--papel);border:1px solid var(--borde);border-radius:3px;padding:18px;margin-bottom:14px}
 .tarjeta>h2{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);font-weight:600;margin:0 0 14px}
@@ -102,7 +123,8 @@ input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-vis
 
 <header>
   <div class="env">
-    <div class="marca">Seguriprev <span>Escucha</span></div>
+    <img class="logo" src="escudo.png" alt="" width="107" height="121">
+    <div class="marca"><span>Seguriprev</span> Escucha</div>
     <button class="btn-vol" id="volver" hidden>Menú</button>
     <div class="ctx" id="ctx"></div>
   </div>
@@ -303,16 +325,21 @@ function menu(){
   $("#volver").hidden = true; $("#barra").hidden = true; $("#ctx").textContent = "";
   const total = guardados.length;
   $("#vista").innerHTML = `
-    <h1>Levantamiento en campo</h1>
-    <p class="bajada">Elige el instrumento, llénalo en la tableta y guárdalo. Las respuestas se quedan
-      en esta tableta aunque no haya señal; cuando vuelvas a tener internet las exportas todas juntas.</p>
+    <section class="portada">
+      <img src="escudo.png" alt="" width="107" height="121">
+      <div>
+        <h1>Levantamiento en campo</h1>
+        <p>Elige el instrumento, llénalo en la tableta y guárdalo. Las respuestas se quedan en esta
+          tableta aunque no haya señal; al cerrar la jornada las exportas todas juntas.</p>
+      </div>
+    </section>
     <div class="menu">
       ${INSTRUMENTOS.map(i => {
         const n = guardados.filter(g => g.instrumento === i.id).length;
         return `<button class="inst" data-i="${i.id}">
           <span class="letra">${i.id}</span>
           <span><span class="nom">${esc(i.nombre)}</span><span class="det">${esc(i.det)}</span></span>
-          <span class="cuenta">${n ? n + (n === 1 ? " guardada" : " guardadas") : "sin capturas"}</span>
+          <span class="cuenta${n ? " hay" : ""}">${n ? n + (n === 1 ? " guardada" : " guardadas") : "sin capturas"}</span>
         </button>`;}).join("")}
       <button class="inst" data-i="EXPORTAR" style="border-left-color:var(--carbon)">
         <span class="letra">↗</span>
