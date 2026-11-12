@@ -1,0 +1,484 @@
+<!doctype html><html lang="es"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SEGURIPREV Escucha</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Escucha">
+<meta name="theme-color" content="#1e1e1c">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: una columna de ancho de tableta; cabecera fija con el instrumento en curso,
+   tarjetas por bloque de preguntas y una barra de acciones al pie. */
+:root{
+  --carbon:#1e1e1c;         /* negro del logo */
+  --oro:#b08d4f;            /* bronce institucional */
+  --bg:#f7f5f1;             /* hueso, con sesgo cálido hacia el oro */
+  --papel:#ffffff;
+  --fg:#23221f;
+  --tenue:#6b675f;
+  --borde:#e2dccf;
+  --ok:#2f6b4f;
+  --alerta:#9a3412;
+  --display:'Cormorant Garamond',Georgia,serif;
+  --texto:'Montserrat',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --carbon:#0f0f0e;--oro:#c9a461;--bg:#17171a;--papel:#1f1f22;--fg:#eceae4;
+  --tenue:#a3a098;--borde:#33322e;--ok:#6cc39a;--alerta:#f08a6a;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --carbon:#0f0f0e;--oro:#c9a461;--bg:#17171a;--papel:#1f1f22;--fg:#eceae4;
+  --tenue:#a3a098;--borde:#33322e;--ok:#6cc39a;--alerta:#f08a6a;color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--texto);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--carbon)}
+.env{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--carbon);color:#f3efe6}
+header .env{display:flex;align-items:center;gap:12px;padding-block:12px;min-height:58px}
+.marca{font-family:var(--display);font-size:19px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.marca span{color:var(--oro)}
+header .ctx{margin-left:auto;font-size:12px;color:#c3bdb0;text-align:right;min-width:0}
+.btn-vol{background:none;border:1px solid #4a4843;color:#f3efe6;border-radius:6px;padding:6px 11px;font:inherit;font-size:13px;cursor:pointer}
+.btn-vol:hover{border-color:var(--oro)}
+
+main{padding-block:22px 110px}
+h1{font-family:var(--display);font-size:30px;font-weight:700;letter-spacing:.02em;margin:0 0 6px;text-wrap:balance}
+.bajada{color:var(--tenue);font-size:14px;margin:0 0 22px;max-width:62ch}
+
+.menu{display:grid;gap:12px}
+.inst{display:flex;align-items:flex-start;gap:14px;width:100%;text-align:left;background:var(--papel);
+  border:1px solid var(--borde);border-left:4px solid var(--oro);border-radius:3px;padding:16px 18px;
+  font:inherit;color:inherit;cursor:pointer}
+.inst:hover{border-color:var(--oro)}
+.inst .letra{font-family:var(--display);font-size:26px;font-weight:700;color:var(--oro);line-height:1;width:26px;flex:none}
+.inst .nom{font-weight:600;font-size:15px}
+.inst .det{color:var(--tenue);font-size:13px;margin-top:3px}
+.inst .cuenta{margin-left:auto;flex:none;font-size:12px;font-weight:600;color:var(--tenue);
+  font-variant-numeric:tabular-nums;white-space:nowrap;padding-top:4px}
+
+.tarjeta{background:var(--papel);border:1px solid var(--borde);border-radius:3px;padding:18px;margin-bottom:14px}
+.tarjeta>h2{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--oro);font-weight:600;margin:0 0 14px}
+.campos{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+label{display:block;font-size:12px;color:var(--tenue);margin-bottom:4px;font-weight:500}
+input[type=text],input[type=date],textarea,select{width:100%;min-width:0;background:var(--bg);color:var(--fg);
+  border:1px solid var(--borde);border-radius:3px;padding:9px 10px;font:inherit;font-size:14px}
+textarea{min-height:66px;resize:vertical}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--oro);outline-offset:1px}
+
+.react{padding:11px 0;border-bottom:1px solid var(--borde)}
+.react:last-child{border-bottom:0}
+.react .enun{font-size:14px;margin-bottom:9px}
+.ops{display:flex;flex-wrap:wrap;gap:7px}
+.ops button{min-width:44px;padding:9px 12px;border:1px solid var(--borde);background:var(--bg);color:var(--fg);
+  border-radius:3px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;font-variant-numeric:tabular-nums}
+.ops button[aria-pressed=true]{background:var(--carbon);border-color:var(--carbon);color:#f3efe6}
+.ops.cpnc button[aria-pressed=true][data-v=NC]{background:var(--alerta);border-color:var(--alerta)}
+.ops.cpnc button[aria-pressed=true][data-v=C]{background:var(--ok);border-color:var(--ok)}
+.escala{font-size:12px;color:var(--tenue);margin:-6px 0 12px}
+
+.barra{position:fixed;left:0;right:0;bottom:0;background:var(--papel);border-top:1px solid var(--borde);z-index:8;
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+.barra .env{display:flex;gap:10px;align-items:center;padding-block:12px}
+.barra .aviso{font-size:12px;color:var(--tenue);min-width:0;flex:1}
+.b{border:1px solid var(--carbon);background:var(--carbon);color:#f3efe6;border-radius:3px;padding:11px 18px;
+  font:inherit;font-size:14px;font-weight:600;cursor:pointer;flex:none}
+.b.sec{background:transparent;color:var(--fg);border-color:var(--borde)}
+.b:hover{border-color:var(--oro)}
+
+.reg{display:flex;gap:12px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--borde);font-size:13px}
+.reg .q{font-weight:600}
+.reg .c{color:var(--tenue);margin-left:auto;font-variant-numeric:tabular-nums;white-space:nowrap}
+.vacio{color:var(--tenue);font-size:14px;padding:22px 0;text-align:center}
+#csv{width:100%;min-height:150px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;white-space:pre}
+.nota{border-left:3px solid var(--oro);background:var(--papel);padding:12px 14px;font-size:13px;color:var(--tenue);margin-bottom:16px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--carbon);color:#f3efe6;
+  padding:11px 18px;border-radius:3px;font-size:13.5px;z-index:20;box-shadow:0 6px 22px rgba(0,0,0,.26)}
+@media (prefers-reduced-motion:no-preference){.toast{animation:sube .22s ease-out}}
+@keyframes sube{from{opacity:0;transform:translate(-50%,8px)}}
+@media(max-width:430px){h1{font-size:25px}.barra .aviso{display:none}.b{flex:1}}
+</style>
+</head><body>
+
+<header>
+  <div class="env">
+    <div class="marca">Seguriprev <span>Escucha</span></div>
+    <button class="btn-vol" id="volver" hidden>Menú</button>
+    <div class="ctx" id="ctx"></div>
+  </div>
+</header>
+
+<main class="env">
+  <div id="vista"></div>
+</main>
+
+<div class="barra" id="barra" hidden>
+  <div class="env">
+    <div class="aviso" id="aviso"></div>
+    <button class="b sec" id="limpiar" type="button">Limpiar</button>
+    <button class="b" id="guardar" type="button">Guardar encuesta</button>
+  </div>
+</div>
+
+<script>
+const ESC5 = ["1","2","3","4","5","N/A"];
+const CPNC = ["C","P","NC","NA"];
+
+const INSTRUMENTOS = [
+  { id:"A", nombre:"Encuesta de incorporación", det:"Se aplica al día 7 y al día 30 del ingreso",
+    escala:"1 = totalmente en desacuerdo · 5 = totalmente de acuerdo · N/A = no aplica",
+    campos:[["fecha","Fecha","date"],["corte","Corte","sel:Día 7|Día 30"],["colaborador","Código de colaborador (opcional)","text"],
+            ["servicio","Servicio / código","text"],["turno","Turno","text"],["supervisor","Supervisor / código","text"],
+            ["ingreso","Fecha de ingreso","date"]],
+    reactivos:[
+      "El sueldo y las prestaciones coinciden con lo que me ofrecieron.",
+      "El horario, los descansos y los relevos coinciden con lo informado.",
+      "Recibí uniforme y equipo adecuado y a tiempo.",
+      "Conozco mis consignas y funciones.",
+      "Recibí capacitación suficiente para desempeñarme.",
+      "Mi supervisor me trata con respeto.",
+      "Cuento con medios para reportar incidencias y pedir ayuda.",
+      "Las condiciones físicas del servicio son adecuadas.",
+      "El traslado al servicio es razonable para mí.",
+      "Considero probable permanecer al menos los próximos tres meses."],
+    extras:[
+      ["dificultad","¿Cuál ha sido la mayor dificultad desde tu ingreso?","ops:Turnos|Pago|Equipo|Supervisor|Cliente|Traslado|Capacitación|Ninguna|Otra"],
+      ["cambio","¿Qué cambio ayudaría a mejorar tu experiencia?","texto"],
+      ["incidencia","Incidencia que requiere atención inmediata","ops:Sí|No"],
+      ["canalizacion","Descripción y canalización","texto"]] },
+
+  { id:"B", nombre:"Encuesta de permanencia", det:"Trimestral, a personal activo",
+    escala:"1 = muy insatisfecho · 5 = muy satisfecho · N/A = no aplica",
+    campos:[["fecha","Fecha","date"],["servicio","Servicio / código","text"],["turno","Turno","text"],
+            ["supervisor","Supervisor / código","text"],["antiguedad","Antigüedad","text"]],
+    reactivos:[
+      "Trato y comunicación de mi supervisor",
+      "Puntualidad y claridad de pagos",
+      "Organización de turnos y relevos",
+      "Descansos y carga de trabajo",
+      "Seguridad y condiciones del servicio",
+      "Trato del personal del cliente",
+      "Equipo, uniformes y herramientas",
+      "Capacitación y claridad de consignas",
+      "Atención de RH y Operaciones a mis reportes",
+      "Oportunidades de desarrollo"],
+    extras:[
+      ["dejar","¿Has considerado dejar SEGURIPREV en los próximos 90 días?","ops:No|Tal vez|Sí|Prefiero no responder"],
+      ["causas","Si respondiste sí o tal vez, ¿cuáles son las causas?","ops:Sueldo|Turnos|Supervisor|Cliente|Traslado|Pago|Familia|Otra"],
+      ["permanecer","¿Qué tendría que cambiar para que permanecieras?","texto"],
+      ["reporto","¿Reportaste anteriormente algún problema?","ops:Sí|No"],
+      ["resolvio","¿Se resolvió?","ops:Sí|Parcial|No|N/A"],
+      ["recomienda","¿Recomendarías SEGURIPREV como lugar para trabajar?","ops:Sí|No|No estoy seguro"],
+      ["porque","¿Por qué?","texto"]] },
+
+  { id:"C", nombre:"Encuesta de salida", det:"Voluntaria y por separado del finiquito",
+    escala:"1 = nada · 5 = determinante · N/A = no aplica",
+    campos:[["fecha","Fecha","date"],["servicio","Servicio / código","text"],["turno","Turno","text"],
+            ["supervisor","Supervisor / código","text"],["antiguedad","Antigüedad","text"],
+            ["tipo","Tipo de separación","sel:Renuncia|Abandono reportado|Terminación|Fin de servicio|Otro"]],
+    reactivos:[
+      "Remuneración y prestaciones",
+      "Horarios, descansos y relevos",
+      "Trato del supervisor",
+      "Trato del cliente",
+      "Condiciones físicas del servicio",
+      "Equipo y capacitación",
+      "Tiempo y costo de traslado",
+      "Atención a reportes y aclaraciones"],
+    extras:[
+      ["motivo1","Motivo principal de salida","ops:Mejor sueldo|Turnos y descansos|Supervisor|Cliente|Distancia o transporte|Pago|Falta de crecimiento|Personal"],
+      ["motivo2","Motivo secundario (opcional)","ops:Mejor sueldo|Turnos y descansos|Supervisor|Cliente|Distancia o transporte|Pago|Falta de crecimiento|Personal"],
+      ["reporto","¿Reportaste el problema antes de decidir salir?","ops:Sí|No|No hubo problema específico"],
+      ["atendio","Si lo reportaste, ¿se atendió?","ops:Sí|Parcialmente|No|No aplica"],
+      ["cambiar","¿Qué tendría que haber cambiado para que permanecieras?","texto"],
+      ["mejor","¿Qué fue lo mejor de trabajar aquí?","texto"],
+      ["urgente","¿Qué debería corregirse urgentemente?","texto"],
+      ["volveria","¿Volverías a trabajar con SEGURIPREV?","ops:Sí|Tal vez|No"],
+      ["recomienda","¿Recomendarías trabajar aquí?","ops:Sí|No|Tal vez"],
+      ["obs","Observaciones adicionales","texto"]] },
+
+  { id:"D", nombre:"Auditoría de condiciones", det:"Mensual, la levanta el auditor en el servicio", cpnc:true,
+    escala:"C = cumple · P = parcial · NC = no cumple · NA = no aplica",
+    campos:[["servicio","Servicio","text"],["cliente","Cliente","text"],["fecha","Fecha","date"],
+            ["auditor","Auditor","text"],["turno","Turno revisado","text"]],
+    reactivos:[
+      "Dotación real frente a plantilla contratada",
+      "Cobertura de relevos y descansos",
+      "Registro de incidencias y tiempos de respuesta",
+      "Consignas vigentes y conocidas",
+      "Uniformes, equipo y medios de comunicación",
+      "Baños, agua potable y área de resguardo",
+      "Condiciones de seguridad y riesgos del puesto",
+      "Capacitación documentada",
+      "Trato e instrucciones del cliente",
+      "Registro de horas adicionales y su validación",
+      "Canal de quejas conocido y accesible",
+      "Seguimiento a hallazgos del mes anterior"],
+    extras:[
+      ["hallazgo","Hallazgo y evidencia","texto"],
+      ["accion","Acción requerida","texto"],
+      ["responsable","Responsable","campo"],
+      ["compromiso","Fecha compromiso","campo"],
+      ["cierre","Validación de cierre y evidencia","texto"]] },
+
+  { id:"E", nombre:"Evaluación de supervisión", det:"Confidencial; no registrar el nombre de quien evalúa",
+    escala:"1 = nunca · 5 = siempre · N/A = no aplica",
+    campos:[["periodo","Periodo","text"],["servicio","Servicio / código","text"],["supervisor","Supervisor evaluado / código","text"]],
+    reactivos:[
+      "Trata con respeto y sin humillaciones.",
+      "Comunica consignas e instrucciones con claridad.",
+      "Organiza turnos y relevos con anticipación.",
+      "Atiende reportes e incidencias oportunamente.",
+      "Aplica criterios consistentes y justos.",
+      "Escucha propuestas y preocupaciones.",
+      "Escala problemas que no puede resolver.",
+      "Da seguimiento a compromisos."],
+    extras:[
+      ["bien","¿Qué hace bien este supervisor?","texto"],
+      ["mejorar","¿Qué debe mejorar?","texto"],
+      ["confidencial","¿Existe algún asunto que requiera atención confidencial inmediata?","ops:Sí|No"],
+      ["canal","Canal seguro para darle seguimiento","campo"]] }
+];
+
+const LLAVE = "seguriprev-escucha-v1";
+let guardados = [];
+try { guardados = JSON.parse(localStorage.getItem(LLAVE) || "[]"); } catch (e) { guardados = []; }
+function persiste(){ try { localStorage.setItem(LLAVE, JSON.stringify(guardados)); return true; } catch(e){ return false; } }
+
+/* La tableta es la que manda: primero se guarda aquí, para que el levantamiento no dependa
+   de que haya señal en la caseta. La subida al concentrado es un segundo paso que se
+   reintenta solo; si nunca hay internet, el export por copiar y pegar sigue funcionando.
+
+   12-nov-2026, al mudar la app a GitHub Pages: fuera del entorno de Claude la variable
+   "claude" NO existe, y "claude?.use?.()" no protege de eso — una variable no declarada
+   truena con ReferenceError y se llevaba de corbata el resto del script. Por eso se
+   comprueba con typeof antes de tocarla. Aquí no hay concentrado: todo vive en la tableta
+   y se saca por "Exportar y respaldar". */
+const RUNTIME = (typeof claude !== "undefined") ? claude : null;
+let nube = null, puedeLeerNube = false;
+Promise.resolve(RUNTIME && RUNTIME.use ? RUNTIME.use("db") : null).then(async d => {
+  nube = d;
+  if (!nube) return;
+  try { await nube.collection("encuestas").limit(1).get(); puedeLeerNube = true; } catch (e) { puedeLeerNube = false; }
+  subirPendientes();
+}).catch(() => { nube = null; });
+
+function pendientes(){ return guardados.filter(g => !g.subida); }
+
+async function subirPendientes(){
+  if (!nube) return 0;
+  let n = 0;
+  for (const reg of pendientes()) {
+    try {
+      await nube.doc("encuestas/" + reg.id).set({
+        instrumento: reg.instrumento, nombre: reg.nombre,
+        capturado: reg.capturado, datos: reg.datos });
+      reg.subida = true; n++;
+    } catch (e) { break; }      // sin señal o sin permiso: se reintenta después
+  }
+  if (n) { persiste(); pintaEstado(); }
+  return n;
+}
+
+function pintaEstado(){
+  const el = document.querySelector("#estado");
+  if (!el) return;
+  const p = pendientes().length;
+  if (!nube) el.textContent = "Las encuestas se guardan en esta tableta. Expórtalas antes de borrarlas.";
+  else if (p) el.textContent = `${p} encuesta(s) esperando subir al concentrado.`;
+  else el.textContent = "Todo subido al concentrado.";
+}
+
+let actual = null, respuestas = {};
+const $ = s => document.querySelector(s);
+const esc = t => String(t ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function aviso(txt){
+  const t = document.createElement("div"); t.className = "toast"; t.textContent = txt;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
+}
+
+function menu(){
+  actual = null; respuestas = {};
+  $("#volver").hidden = true; $("#barra").hidden = true; $("#ctx").textContent = "";
+  const total = guardados.length;
+  $("#vista").innerHTML = `
+    <h1>Levantamiento en campo</h1>
+    <p class="bajada">Elige el instrumento, llénalo en la tableta y guárdalo. Las respuestas se quedan
+      en esta tableta aunque no haya señal; cuando vuelvas a tener internet las exportas todas juntas.</p>
+    <div class="menu">
+      ${INSTRUMENTOS.map(i => {
+        const n = guardados.filter(g => g.instrumento === i.id).length;
+        return `<button class="inst" data-i="${i.id}">
+          <span class="letra">${i.id}</span>
+          <span><span class="nom">${esc(i.nombre)}</span><span class="det">${esc(i.det)}</span></span>
+          <span class="cuenta">${n ? n + (n === 1 ? " guardada" : " guardadas") : "sin capturas"}</span>
+        </button>`;}).join("")}
+      <button class="inst" data-i="EXPORTAR" style="border-left-color:var(--carbon)">
+        <span class="letra">↗</span>
+        <span><span class="nom">Exportar y respaldar</span><span class="det">Revisar lo capturado y pasarlo a Excel</span></span>
+        <span class="cuenta">${total} en total</span>
+      </button>
+    </div>
+    <p class="escala" id="estado" style="margin-top:16px">Guardando en esta tableta.</p>`;
+  pintaEstado();
+  document.querySelectorAll(".inst").forEach(b => b.onclick = () =>
+    b.dataset.i === "EXPORTAR" ? exportar() : abrir(b.dataset.i));
+}
+
+function bloqueExtra([k, etiqueta, tipo]){
+  if (tipo === "texto")
+    return `<div class="react"><div class="enun">${esc(etiqueta)}</div><textarea data-k="${k}"></textarea></div>`;
+  if (tipo === "campo")
+    return `<div class="react"><div class="enun">${esc(etiqueta)}</div><input type="text" data-k="${k}"></div>`;
+  const ops = tipo.slice(4).split("|");
+  return `<div class="react"><div class="enun">${esc(etiqueta)}</div><div class="ops" data-k="${k}">
+    ${ops.map(o => `<button type="button" data-v="${esc(o)}" aria-pressed="false">${esc(o)}</button>`).join("")}</div></div>`;
+}
+
+function abrir(id){
+  actual = INSTRUMENTOS.find(i => i.id === id); respuestas = {};
+  $("#volver").hidden = false; $("#barra").hidden = false;
+  $("#ctx").textContent = "Instrumento " + actual.id;
+  const vals = actual.cpnc ? CPNC : ESC5;
+  $("#vista").innerHTML = `
+    <h1>${esc(actual.nombre)}</h1>
+    <p class="bajada">${esc(actual.det)}</p>
+    <div class="tarjeta"><h2>Datos del levantamiento</h2><div class="campos">
+      ${actual.campos.map(([k, etiqueta, tipo]) => {
+        if (tipo.startsWith("sel:"))
+          return `<div><label for="c-${k}">${esc(etiqueta)}</label><select id="c-${k}" data-k="${k}">
+            <option value=""></option>${tipo.slice(4).split("|").map(o => `<option>${esc(o)}</option>`).join("")}</select></div>`;
+        return `<div><label for="c-${k}">${esc(etiqueta)}</label><input id="c-${k}" type="${tipo}" data-k="${k}"></div>`;
+      }).join("")}
+    </div></div>
+    <div class="tarjeta"><h2>Reactivos</h2>
+      <p class="escala">${esc(actual.escala)}</p>
+      ${actual.reactivos.map((r, n) => `<div class="react">
+        <div class="enun">${actual.cpnc ? "" : (n + 1) + ". "}${esc(r)}</div>
+        <div class="ops ${actual.cpnc ? "cpnc" : ""}" data-k="r${n}">
+          ${vals.map(v => `<button type="button" data-v="${v}" aria-pressed="false">${v}</button>`).join("")}
+        </div></div>`).join("")}
+    </div>
+    <div class="tarjeta"><h2>Preguntas abiertas</h2>${actual.extras.map(bloqueExtra).join("")}</div>`;
+  document.querySelectorAll(".ops").forEach(g => g.onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const ya = b.getAttribute("aria-pressed") === "true";
+    g.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", "false"));
+    b.setAttribute("aria-pressed", ya ? "false" : "true");
+    if (ya) delete respuestas[g.dataset.k]; else respuestas[g.dataset.k] = b.dataset.v;
+    cuenta();
+  });
+  document.querySelectorAll("[data-k]").forEach(el => {
+    if (el.classList.contains("ops")) return;
+    el.oninput = () => { respuestas[el.dataset.k] = el.value; cuenta(); };
+  });
+  cuenta();
+}
+
+function cuenta(){
+  const n = actual.reactivos.filter((_, i) => respuestas["r" + i] !== undefined).length;
+  $("#aviso").textContent = `${n} de ${actual.reactivos.length} reactivos contestados`;
+}
+
+function guardar(){
+  const faltan = actual.reactivos.filter((_, i) => respuestas["r" + i] === undefined).length;
+  if (faltan === actual.reactivos.length) { aviso("Todavía no hay ninguna respuesta"); return; }
+  const reg = { id: Date.now(), instrumento: actual.id, nombre: actual.nombre,
+                capturado: new Date().toISOString(), datos: { ...respuestas }, subida: false };
+  guardados.push(reg);
+  if (!persiste()) { aviso("No se pudo guardar en esta tableta"); return; }
+  aviso(faltan ? `Guardada con ${faltan} reactivo(s) en blanco` : "Encuesta guardada en la tableta");
+  menu();
+  subirPendientes();
+}
+
+function csvDe(lista){
+  const campos = new Set(["instrumento", "capturado"]);
+  lista.forEach(r => Object.keys(r.datos).forEach(k => campos.add(k)));
+  const cols = [...campos];
+  const linea = v => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const filas = lista.map(r => cols.map(c =>
+    linea(c === "instrumento" ? r.instrumento : c === "capturado" ? r.capturado.slice(0, 16).replace("T", " ") : r.datos[c])).join(","));
+  return [cols.map(linea).join(","), ...filas].join("\n");
+}
+
+function exportar(){
+  actual = null;
+  $("#volver").hidden = false; $("#barra").hidden = true; $("#ctx").textContent = "Exportar";
+  if (!guardados.length) {
+    $("#vista").innerHTML = `<h1>Exportar y respaldar</h1>
+      <p class="vacio">Todavía no hay encuestas guardadas en esta tableta.</p>`;
+    return;
+  }
+  const porInst = INSTRUMENTOS.map(i => [i, guardados.filter(g => g.instrumento === i.id)]).filter(([, l]) => l.length);
+  $("#vista").innerHTML = `
+    <h1>Exportar y respaldar</h1>
+    <p class="bajada">Copia el texto y pégalo en Excel o en Hojas de cálculo: cada encuesta es un renglón.
+      Hazlo antes de borrar nada, porque las respuestas viven solo en esta tableta.</p>
+    <div class="nota">Guardadas aquí: <b>${guardados.length}</b>. La más reciente,
+      ${esc(guardados[guardados.length - 1].capturado.slice(0, 16).replace("T", " "))}.</div>
+    <div class="tarjeta"><h2>Lo capturado</h2>
+      ${porInst.map(([i, l]) => `<div class="reg"><span class="q">${i.id}</span>
+        <span>${esc(i.nombre)}</span><span class="c">${l.length}</span></div>`).join("")}
+    </div>
+    <div class="tarjeta"><h2>Datos para Excel</h2>
+      <div class="campos" style="margin-bottom:12px">
+        <div><label for="filtro">Instrumento</label><select id="filtro">
+          <option value="">Todos</option>
+          ${porInst.map(([i]) => `<option value="${i.id}">${i.id} · ${esc(i.nombre)}</option>`).join("")}
+        </select></div>
+      </div>
+      <textarea id="csv" readonly></textarea>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <button class="b" id="copiar" type="button">Copiar</button>
+        <button class="b sec" id="bajar" type="button">Descargar CSV</button>
+        <button class="b sec" id="borrar" type="button">Borrar lo exportado</button>
+      </div>
+      <p class="escala" id="estado" style="margin:12px 0 0"></p>
+    </div>`;
+  pintaEstado();
+  const pinta = () => {
+    const f = $("#filtro").value;
+    $("#csv").value = csvDe(f ? guardados.filter(g => g.instrumento === f) : guardados);
+  };
+  $("#filtro").onchange = pinta; pinta();
+  $("#copiar").onclick = async () => {
+    const t = $("#csv");
+    try { await navigator.clipboard.writeText(t.value); aviso("Copiado: pégalo en Excel"); }
+    catch (e) { t.focus(); t.select(); aviso("Ya está seleccionado: cópialo con el teclado"); }
+  };
+  /* En el iPad no hay "copiar y pegar en Excel" cómodo: el archivo se baja y se abre en
+     Numbers o se manda por correo. El BOM es para que Excel respete los acentos. */
+  $("#bajar").onclick = () => {
+    const f = $("#filtro").value;
+    const blob = new Blob(["﻿" + $("#csv").value], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `escucha-${f || "todas"}-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    aviso("Descargado");
+  };
+  $("#borrar").onclick = () => {
+    const f = $("#filtro").value;
+    const b = $("#borrar");
+    if (b.dataset.seguro !== "1") {
+      b.dataset.seguro = "1";
+      b.textContent = "Confirmar: esto no se recupera";
+      aviso("Expórtalas antes de borrar: no hay copia en otro lado.");
+      setTimeout(() => { b.dataset.seguro = ""; b.textContent = "Borrar lo exportado"; }, 5000);
+      return;
+    }
+    guardados = f ? guardados.filter(g => g.instrumento !== f) : [];
+    persiste(); aviso("Borrado de la tableta"); exportar();
+  };
+}
+
+$("#volver").onclick = menu;
+$("#guardar").onclick = guardar;
+$("#limpiar").onclick = () => { if (actual) abrir(actual.id); };
+menu();
+</script>
+
+</body></html>
