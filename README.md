@@ -31,11 +31,15 @@
 
 ## En el iPad
 
-1. Abrir la liga en **Safari**.
-2. Compartir › **Añadir a pantalla de inicio**. Queda como app, con el escudo y sin barra del navegador.
+1. Abrir la liga en **Safari** y tocar **Instalar**, abajo de la lista: la app enseña los tres pasos.
+2. Compartir › **Añadir a pantalla de inicio** › **Añadir**. Queda con el escudo y sin barra del navegador.
 3. Elegir el instrumento, llenarlo y **Guardar encuesta**. Funciona sin señal.
 4. Al cerrar la jornada: **Exportar y respaldar** › *Copiar* para pegar en Excel, o **Descargar CSV**
    para abrirlo en Numbers o mandarlo por correo.
+
+> En Android y en la computadora el botón **Instalar** la instala de una vez. En iPad y iPhone,
+> Apple no permite instalar por programa: solo **Safari** puede agregar a la pantalla de inicio, y
+> por eso el botón abre la guía de los tres toques en vez de hacerlo solo.
 
 ## Dónde viven las respuestas
 
@@ -64,5 +68,6 @@ script; agregar un reactivo es agregar un renglón.
 | `logo.png` · `escudo.png` | Marca institucional |
 | `icon-512.png` · `icon-192.png` · `apple-touch-icon.png` | Íconos de pantalla de inicio |
 | `manifest.webmanifest` | Para que se instale como app |
+| `sw.js` | Service worker: la hace instalable y la deja abrir sin señal |
 
 <p align="center"><sub>Protección y Seguridad Privada SECURITAS, S. de R.L. de C.V. · Uso interno</sub></p>

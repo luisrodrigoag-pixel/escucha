@@ -113,6 +113,33 @@ input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-vis
 .vacio{color:var(--tenue);font-size:14px;padding:22px 0;text-align:center}
 #csv{width:100%;min-height:150px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;white-space:pre}
 .nota{border-left:3px solid var(--oro);background:var(--papel);padding:12px 14px;font-size:13px;color:var(--tenue);margin-bottom:16px}
+/* Instalación: tira discreta bajo la lista y hoja de pasos para Safari, que no deja
+   instalar con un toque. */
+.instalar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--papel);
+  border:1px solid var(--borde);border-left:4px solid var(--carbon);border-radius:3px;
+  padding:14px 18px;margin-top:18px}
+.instalar .txt{flex:1;min-width:190px;font-size:13.5px;color:var(--tenue)}
+.instalar .txt b{color:var(--fg);font-weight:600}
+.instalada{margin-top:18px;font-size:13px;color:var(--tenue);display:flex;align-items:center;gap:8px}
+.instalada::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
+
+.velo{position:fixed;inset:0;background:rgba(15,15,14,.55);z-index:30;display:flex;
+  align-items:flex-end;justify-content:center;padding:0}
+@media(min-width:620px){.velo{align-items:center;padding:24px}}
+.hoja{background:var(--papel);width:100%;max-width:560px;border-radius:3px;padding:26px 24px 22px;
+  max-height:88vh;overflow:auto}
+.hoja h2{font-family:var(--display);font-size:24px;margin:0 0 4px;letter-spacing:.01em}
+.hoja .sub{color:var(--tenue);font-size:13.5px;margin:0 0 18px}
+.paso{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--borde)}
+.paso:last-of-type{border-bottom:0}
+.paso .n{font-family:var(--display);font-size:22px;font-weight:700;color:var(--oro);line-height:1.1;width:22px;flex:none}
+.paso .q{font-size:14px}
+.paso .q b{font-weight:600}
+.compartir{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border:1px solid var(--borde);border-radius:4px;vertical-align:-6px;margin:0 2px;color:var(--fg)}
+.ojo{background:var(--bg);border-left:3px solid var(--oro);padding:11px 13px;font-size:13px;
+  color:var(--tenue);margin:16px 0 18px}
+
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--carbon);color:#f3efe6;
   padding:11px 18px;border-radius:3px;font-size:13.5px;z-index:20;box-shadow:0 6px 22px rgba(0,0,0,.26)}
 @media (prefers-reduced-motion:no-preference){.toast{animation:sube .22s ease-out}}
@@ -347,8 +374,10 @@ function menu(){
         <span class="cuenta">${total} en total</span>
       </button>
     </div>
-    <p class="escala" id="estado" style="margin-top:16px">Guardando en esta tableta.</p>`;
+    <p class="escala" id="estado" style="margin-top:16px">Guardando en esta tableta.</p>
+    <div id="instalacion"></div>`;
   pintaEstado();
+  pintaInstalacion();
   document.querySelectorAll(".inst").forEach(b => b.onclick = () =>
     b.dataset.i === "EXPORTAR" ? exportar() : abrir(b.dataset.i));
 }
@@ -501,6 +530,82 @@ function exportar(){
     persiste(); aviso("Borrado de la tableta"); exportar();
   };
 }
+
+/* ---- Instalar en la tableta -------------------------------------------------------
+   Android y Chrome de escritorio avisan con "beforeinstallprompt" y ahí sí se instala
+   con un toque. Safari de iOS NO lo soporta —Apple no deja instalar por programa—, así
+   que al iPad se le enseñan los tres pasos. Y en Chrome o Firefox DENTRO del iPhone o
+   iPad tampoco se puede: solo Safari agrega a la pantalla de inicio. */
+let promptInstalar = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); promptInstalar = e; pintaInstalacion(); });
+window.addEventListener("appinstalled", () => { promptInstalar = null; pintaInstalacion(); });
+
+const yaInstalada = () => window.navigator.standalone === true ||
+  window.matchMedia("(display-mode: standalone)").matches;
+const esIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);   // iPad se anuncia como Mac
+const esSafari = () => !/CriOS|FxiOS|EdgiOS|OPiOS/.test(navigator.userAgent);
+
+function pintaInstalacion(){
+  const caja = document.querySelector("#instalacion");
+  if (!caja) return;
+  if (yaInstalada()) {
+    caja.innerHTML = `<p class="instalada">Instalada en esta tableta. Abre sin señal.</p>`;
+    return;
+  }
+  caja.innerHTML = `<div class="instalar">
+      <div class="txt"><b>Tenla como app en la tableta.</b> Abre a pantalla completa, con su ícono,
+        y funciona aunque no haya señal.</div>
+      <button class="b" id="btn-instalar" type="button">Instalar</button>
+    </div>`;
+  document.querySelector("#btn-instalar").onclick = instalar;
+}
+
+async function instalar(){
+  if (promptInstalar) {                       // Android y escritorio: de verdad con un toque
+    promptInstalar.prompt();
+    const r = await promptInstalar.userChoice.catch(() => null);
+    promptInstalar = null;
+    pintaInstalacion();
+    if (r && r.outcome === "accepted") aviso("Instalando…");
+    return;
+  }
+  pasosSafari();
+}
+
+function pasosSafari(){
+  const enIOS = esIOS();
+  const malNavegador = enIOS && !esSafari();
+  const velo = document.createElement("div");
+  velo.className = "velo";
+  velo.innerHTML = `<div class="hoja" role="dialog" aria-modal="true" aria-label="Instalar en la tableta">
+      <h2>Tenla como app</h2>
+      <p class="sub">Son tres toques. Después abre desde el ícono, sin barra del navegador.</p>
+      ${malNavegador ? `<div class="ojo">Estás en otro navegador. En iPad y iPhone solo <b>Safari</b>
+        puede agregar a la pantalla de inicio: copia la dirección y ábrela ahí.</div>` : ``}
+      <div class="paso"><span class="n">1</span><span class="q">Toca
+        <span class="compartir" aria-hidden="true">&#x2191;</span> <b>Compartir</b>, el cuadro con la
+        flecha hacia arriba${enIOS ? ` (arriba a la derecha en el iPad)` : ``}.</span></div>
+      <div class="paso"><span class="n">2</span><span class="q">Baja en la lista y elige
+        <b>Añadir a pantalla de inicio</b>.</span></div>
+      <div class="paso"><span class="n">3</span><span class="q">Confirma con <b>Añadir</b>. Queda el
+        escudo de SEGURIPREV en la pantalla.</span></div>
+      <div class="ojo">Lo capturado vive en el navegador de esta tableta. Al instalarla empieza su
+        propio espacio: si ya habías guardado encuestas en Safari, expórtalas antes.</div>
+      <button class="b" id="cerrar-hoja" type="button" style="width:100%">Entendido</button>
+    </div>`;
+  document.body.appendChild(velo);
+  const cerrar = () => velo.remove();
+  velo.onclick = e => { if (e.target === velo) cerrar(); };
+  velo.querySelector("#cerrar-hoja").onclick = cerrar;
+  document.addEventListener("keydown", function esc(e){
+    if (e.key === "Escape") { cerrar(); document.removeEventListener("keydown", esc); }
+  });
+}
+
+/* El service worker es lo que permite instalarla y lo que la hace abrir sin señal. */
+if ("serviceWorker" in navigator)
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
 
 $("#volver").onclick = menu;
 $("#guardar").onclick = guardar;
