@@ -286,7 +286,31 @@ const INSTRUMENTOS = [
       ["bien","¿Qué hace bien este supervisor?","texto"],
       ["mejorar","¿Qué debe mejorar?","texto"],
       ["confidencial","¿Existe algún asunto que requiera atención confidencial inmediata?","ops:Sí|No"],
-      ["canal","Canal seguro para darle seguimiento","campo"]] }
+      ["canal","Canal seguro para darle seguimiento","campo"]] },
+
+  { id:"F", nombre:"Encuesta de satisfacción al cliente", det:"La contesta el administrador o encargado del servicio",
+    escala:"1 = nunca o muy mal · 5 = siempre o muy bien · N/A = no aplica",
+    campos:[["fecha","Fecha","date"],["contesta","Nombre de quien contesta","text"],["cargo","Cargo","text"],
+            ["servicio","Lugar o servicio","text"],["antiguedad","Tiempo con Securitas","text"],
+            ["telefono","Teléfono de contacto","text"],["correo","Correo electrónico","text"],
+            ["entrevistador","Entrevistador","text"]],
+    reactivos:[
+      "El servicio está cubierto siempre, sin faltas de personal.",
+      "Los guardias llegan a tiempo al cambio de turno.",
+      "El personal se presenta uniformado y bien presentado.",
+      "Atienden con respeto a residentes, clientes y visitantes.",
+      "Los reportes de novedades le llegan completos y a tiempo.",
+      "Cuando hay un incidente, le avisan de inmediato.",
+      "El supervisor de Securitas lo visita y da la cara.",
+      "Cuando pide algo, se resuelve sin que tenga que insistir.",
+      "La facturación le llega correcta y en la fecha.",
+      "El personal conoce el protocolo del lugar (accesos, rondines, bitácora)."],
+    extras:[
+      ["recomendaria","¿Recomendaría Securitas a otro administrador o propietario? (0 = nunca, 10 = sin dudarlo)","ops:0|1|2|3|4|5|6|7|8|9|10"],
+      ["molesta","¿Qué es lo que más le molesta hoy del servicio?","texto"],
+      ["gusta","¿Qué es lo que más le gusta del servicio?","texto"],
+      ["cambiaria","¿Qué cambiaría primero?","texto"],
+      ["direccion","¿Qué le quiere decir a la Dirección General?","texto"]] }
 ];
 
 const LLAVE = "seguriprev-escucha-v1";

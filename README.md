@@ -5,7 +5,7 @@
 <h1 align="center">ESCUCHA</h1>
 
 <p align="center">
-  Levantamiento en campo de los cinco instrumentos del programa<br>
+  Levantamiento en campo de los instrumentos del programa<br>
   <b>SEGURIPREV ESCUCHA</b> — rotación, permanencia y calidad operativa.
 </p>
 
@@ -28,6 +28,7 @@
 | **C** | Encuesta de salida | Voluntaria y por separado del finiquito |
 | **D** | Auditoría de condiciones | Mensual, la levanta el auditor en el servicio |
 | **E** | Evaluación de supervisión | Confidencial; sin el nombre de quien contesta |
+| **F** | Encuesta de satisfacción al cliente | La contesta el administrador o encargado del servicio |
 
 ## En el iPad
 
